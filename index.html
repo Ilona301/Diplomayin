@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImageLab — Լուսանկարների Մշակման Լաբորատորիա</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,500;1,300&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="logo">Image<span>Lab</span></div>
+   
+  </header>
+
+  <main>
+
+    <!--
+         SIDEBAR — Controls
+   -->
+    <aside class="sidebar">
+
+      <!-- Upload -->
+      <div>
+        <div class="section-label">Նկար բեռնել</div>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept="image/*" />
+          <svg class="upload-icon" viewBox="0 0 36 36" fill="none">
+            <rect width="36" height="36" rx="8" fill="rgba(200,184,154,0.1)"/>
+            <path d="M18 10v14M12 16l6-6 6 6" stroke="#c8b89a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 26h16" stroke="#c8b89a" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <div class="upload-text">
+            <strong>Ընտրել նկար</strong> <br/>JPG, PNG, WebP, GIF
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ── Filters ── -->
+      <div>
+        <div class="section-label">Ֆիլտրեր</div>
+        <div style="display:flex; flex-direction:column; gap:1.2rem;">
+
+          <!-- Gamma Correction -->
+          <div class="filter-block">
+            <div class="filter-header">
+              <div class="toggle-row" style="border:none; padding:0; width:100%;" onclick="toggleFilter('gamma')">
+                <span class="filter-name">Gamma Correction</span>
+                <div class="toggle" id="toggle-gamma"></div>
+              </div>
+            </div>
+         
+            <div class="filter-header">
+              <span style="font-size:11px; color:var(--muted);">γ (gamma)</span>
+              <span class="filter-value" id="val-gamma">1.00</span>
+            </div>
+            <input type="range" id="sl-gamma" min="0.1" max="4" step="0.05" value="1"
+                   oninput="updateParam('gamma', this.value)" />
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Brightness -->
+          <div class="filter-block">
+            <div class="filter-header">
+              <div class="toggle-row" style="border:none; padding:0; width:100%;" onclick="toggleFilter('brightness')">
+                <span class="filter-name">Brightness / Exposure</span>
+                <div class="toggle" id="toggle-brightness"></div>
+              </div>
+            </div>
+          
+            <div class="filter-header">
+              <span style="font-size:11px; color:var(--muted);">b (bias)</span>
+              <span class="filter-value" id="val-brightness">0</span>
+            </div>
+            <input type="range" id="sl-brightness" min="-150" max="150" step="1" value="0"
+                   oninput="updateParam('brightness', this.value)" />
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Contrast -->
+          <div class="filter-block">
+            <div class="filter-header">
+              <div class="toggle-row" style="border:none; padding:0; width:100%;" onclick="toggleFilter('contrast')">
+                <span class="filter-name">Contrast Stretch</span>
+                <div class="toggle" id="toggle-contrast"></div>
+              </div>
+            </div>
+            
+            <div class="filter-header">
+              <span style="font-size:11px; color:var(--muted);">factor</span>
+              <span class="filter-value" id="val-contrast">1.00</span>
+            </div>
+            <input type="range" id="sl-contrast" min="0.1" max="4" step="0.05" value="1"
+                   oninput="updateParam('contrast', this.value)" />
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Histogram Equalization -->
+          <div class="filter-block">
+            <div class="filter-header">
+              <div class="toggle-row" style="border:none; padding:0; width:100%;" onclick="toggleFilter('histeq')">
+                <span class="filter-name">Histogram Equalization</span>
+                <div class="toggle" id="toggle-histeq"></div>
+              </div>
+            </div>
+            
+            <div class="filter-header">
+              <span style="font-size:11px; color:var(--muted);">strength (mix)</span>
+              <span class="filter-value" id="val-histeq">1.00</span>
+            </div>
+            <input type="range" id="sl-histeq" min="0" max="1" step="0.01" value="1"
+                   oninput="updateParam('histeq', this.value)" />
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Tone Mapping -->
+          <div class="filter-block">
+            <div class="filter-header">
+              <div class="toggle-row" style="border:none; padding:0; width:100%;" onclick="toggleFilter('tonemap')">
+                <span class="filter-name">Reinhard Tone Mapping</span>
+                <div class="toggle" id="toggle-tonemap"></div>
+              </div>
+            </div>
+           
+            <div class="filter-header">
+              <span style="font-size:11px; color:var(--muted);">exposure</span>
+              <span class="filter-value" id="val-tonemap">1.00</span>
+            </div>
+            <input type="range" id="sl-tonemap" min="0.1" max="5" step="0.05" value="1"
+                   oninput="updateParam('tonemap', this.value)" />
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Shadows / Highlights -->
+          <div class="filter-block">
+            <div class="filter-header">
+              <div class="toggle-row" style="border:none; padding:0; width:100%;" onclick="toggleFilter('shadow')">
+                <span class="filter-name">Shadows / Highlights</span>
+                <div class="toggle" id="toggle-shadow"></div>
+              </div>
+            </div>
+            
+
+            <div class="filter-header">
+              <span style="font-size:11px; color:var(--muted);">shadows</span>
+              <span class="filter-value" id="val-shadow">0</span>
+            </div>
+            <input type="range" id="sl-shadow" min="-100" max="100" step="1" value="0"
+                   oninput="updateParam('shadow', this.value)" />
+
+            <div class="filter-header" style="margin-top:0.5rem;">
+              <span style="font-size:11px; color:var(--muted);">highlights</span>
+              <span class="filter-value" id="val-highlight">0</span>
+            </div>
+            <input type="range" id="sl-highlight" min="-100" max="100" step="1" value="0"
+                   oninput="updateParam('highlight', this.value)" />
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Channel Selector -->
+          <div>
+            <div class="section-label">Գունային ալիքներ</div>
+            <div class="color-channel-row">
+              <div class="channel-toggle active-r" id="ch-R" onclick="setChannel('R')">
+                <div class="dot dot-r"></div> R
+              </div>
+              <div class="channel-toggle active-g" id="ch-G" onclick="setChannel('G')">
+                <div class="dot dot-g"></div> G
+              </div>
+              <div class="channel-toggle active-b" id="ch-B" onclick="setChannel('B')">
+                <div class="dot dot-b"></div> B
+              </div>
+            </div>
+            <div style="font-size:11px; color:var(--muted); margin-top:0.5rem;">
+              ֆիլտրերը կիրառել գունային ալիքի վրա
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <button class="btn reset-all-btn" onclick="resetAll()">↺ Վերականգնել բոլոր պարամետրերը</button>
+
+          <a id="downloadBtn" class="btn btn-accent reset-all-btn"
+             style="display:none;" download="imagelab_output.png">
+            ↓ Ներբեռնել արդյունքը
+          </a>
+
+        </div>
+      </div>
+    </aside>
+
+    <!--
+         CONTENT — Canvases, Stats, Histogram, Math
+-->
+    <section class="content">
+
+      <!-- Image Comparison -->
+      <div class="canvas-wrapper">
+        <div class="canvas-panel">
+          <div class="canvas-panel-label">
+            <span>Բնօրինակ</span>
+            <span id="imgSize" style="font-size:10px;">—</span>
+          </div>
+          <div class="empty-canvas" id="emptyOriginal">Բեռնել նկար</div>
+          <canvas id="originalCanvas" style="display:none;"></canvas>
+        </div>
+        <div class="canvas-panel">
+          <div class="canvas-panel-label">
+            <span>Արդյունք</span>
+            <span id="processingLabel" style="font-size:10px; color:var(--accent);">—</span>
+          </div>
+          <div class="empty-canvas" id="emptyResult">Կիրառել ֆիլտր</div>
+          <canvas id="resultCanvas" style="display:none;"></canvas>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div class="stats-row" id="statsRow" style="display:none;">
+        <div class="stat-card">
+          <div class="stat-label">Mean (μ)</div>
+          <div class="stat-value" id="stat-mean">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">StdDev (σ)</div>
+          <div class="stat-value" id="stat-std">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Min</div>
+          <div class="stat-value" id="stat-min">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Max</div>
+          <div class="stat-value" id="stat-max">—</div>
+        </div>
+      </div>
+
+      <!-- Histogram -->
+      <div class="histogram-panel" id="histogramPanel" style="display:none;">
+        <div class="canvas-panel-label">
+          <span>Հիստոգրամ</span>
+          <div style="display:flex; gap:0.75rem;">
+            <span style="color:#c97a6a;">■ R</span>
+            <span style="color:var(--accent2);">■ G</span>
+            <span style="color:#7a8a9e;">■ B</span>
+            <span style="color:var(--muted);">□ luma</span>
+          </div>
+        </div>
+        <canvas id="histCanvas" height="100"></canvas>
+      </div>
+
+      <!-- Math Reference Panel -->
+      <div class="math-panel">
+        <div class="math-panel-header">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="var(--accent)" stroke-width="0.8"/>
+            <path d="M7 6v4M7 4.5v.5" stroke="var(--accent)" stroke-width="1" stroke-linecap="round"/>
+          </svg>
+          <span style="font-size:13px; font-weight:500;">Մաթեմատիկական բանաձևեր</span>
+        </div>
+        <div class="math-panel-body">
+          <div class="formula-block">
+            <div class="formula-name">Գամմա ուղղում</div>
+            <div class="formula">I_out = (I_in/255)^γ
+       × 255
+
+γ &lt; 1  →  Լուսավորում
+γ &gt; 1  →  Մթնեցում
+γ = 1  →  Անփոփոխ</div>
+            <div class="formula-desc">CRT մոնիտորի ուղղում γ=2.2 — sRGB ստանդարտ.</div>
+          </div>
+          <div class="formula-block">
+            <div class="formula-name">Հիստոգրամի հավասարեցում</div>
+            <div class="formula">CDF(k) = Σ_{j=0}^{k} p(j)
+
+T(k) = round(
+  (L-1) × CDF(k)
+)
+
+p(j) = n_j / (M × N)</div>
+            <div class="formula-desc">Պիքսելների հավասարաչափ բաշխում</div>
+          </div>
+          <div class="formula-block">
+            <div class="formula-name">Reinhard Tone Mapping</div>
+            <div class="formula">L_d = L × exposure
+
+I_out = (L_d / (1 + L_d))
+       × 255
+
+luma = 0.2126R
+     + 0.7152G
+     + 0.0722B</div>
+            <div class="formula-desc">Ֆոտւնկարների tone mapping</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
